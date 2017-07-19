@@ -10,15 +10,17 @@ var app=express()
 app.use(express.static('www'))
 app.use(bodyParser.urlencoded({extended:true}))
 
+app.use(cookies())
+var storage=multer.diskStorage({
+	destination:'www/uploads',
+	filename:function(req,res,callback){
+		var name=req.cookies.username
+		callback(null,name+'.jpg')
+	}
+	
+})
 
-//var storage=multer.diskStorage({
-//	destination:'www/uploads',
-//	filename:function(req,res,callback){
-//		var name=req.cookies.username
-//		callback(null,name+'.jpg')
-//	}
-//	
-//})
+var uploads=multer({storage})
 
 mongoose.connect('mongodb://localhost:27017/user')
 var db=mongoose.connection
@@ -47,7 +49,6 @@ var questSchema=new Schema({
 	content:String,
 	time:String,
 	ip:String,
-	answerInfo:{type:Schema.Types.ObjectId,ref:'user'}
 },{collection:'question'})
 
 var Quest=mongoose.model('quest',questSchema)
@@ -57,10 +58,14 @@ var answerSchema=new Schema({
 	content:String,
 	time:String,
 	ip:String,
-	
+	answer:String
 },{collection:'answer'})
 
 var Answer=mongoose.model('answer',answerSchema)
+
+
+
+
 
 
 
@@ -106,6 +111,13 @@ app.post('/login',function(req,res){
 				res.status(200).json({code:0,msg:'用户不存在'})
 			}else{
 				if(obj.username==req.body.username){
+					
+					
+					var time=new Date()
+					time.setMonth(time.getMonth()+1)
+					
+					res.cookie('username',req.body.username,{time})
+					
 					res.status(200).json({code:3,msg:'登录成功'})
 				}else{
 					res.status(200).json({code:2,msg:'密码错误'})
@@ -118,7 +130,7 @@ app.post('/login',function(req,res){
 })
 //
 //
-app.post('/question',function(){
+app.post('/question',function(req,res){
 	var Time=new Date()
 	var y = Time.getFullYear();
 	var M = Time.getMonth() + 1;
@@ -134,14 +146,8 @@ app.post('/question',function(){
 	
 	var ip=req.ip
 	
-	
-
-	Answer.findOne({content:req.body.AnswerContent},function(err,data){
-		if(!err){
-			if(data.length==0){
-				return
-			}else{
-				var quest=new Quset({user:req.body.username,content:req.body.content,ip:ip,time:newTime,answerInfo:data._id})
+	console.log(req.cookies.username)
+				var quest=new Quest({user:req.cookies.username,content:req.body.content,ip:ip,time:newTime})
 				quest.save(function(err){
 				if(!err){
 						res.status(200).json({code:3,msg:'提问成功'})
@@ -149,24 +155,30 @@ app.post('/question',function(){
 						res.status(200).json({code:2,msg:'提问失败'})
 					}
 				})
-			}
-		}else{
-			res.status(200).json({code:1,msg:'查找失败'})
-		}
-		
-		
-		
-	})
 	
 })
 
 
 app.post('/answer',function(req,res){
 	
+	var Time=new Date()
+	var y = Time.getFullYear();
+	var M = Time.getMonth() + 1;
+	var d = Time.getDate();
+	var h = Time.getHours();
+	var m = Time.getMinutes();
+	M = M < 10 ? '0' + M : M;
+	d = d < 10 ? '0' + d : d;
+	h = h < 10 ? '0' + h : h;
+	m = m < 10 ? '0' + m : m;
+	var newTime=y + '-' + M + '-' + d + ' ' + h + ':' + m;
 	
+	var ip=req.ip
+	console.log(ip)
 	
-	
-	var answer=new Answer({user:req.body.username,content:req.body.content,ip:ip,time:newTime,})
+//	console.log(req.cookies.username)
+	var username=req.cookies.username
+	var answer=new Answer({user:username,content:req.body.content,ip:ip,time:newTime})
 	answer.save(function(err){
 		if(err){
 			res.status(200).json({code:0,msg:'回答失败'})
@@ -176,8 +188,32 @@ app.post('/answer',function(req,res){
 	})
 })
 
+app.get('/home',function(req,res){
+	Quest.find(function(err,data){
+		var questData=data
+		Answer.find(function(err,data){
+			var answerData=data
+			console.log(answerData)
+			var render=require('./www/home')
+			var htmlStr=render({
+				quest:questData,
+				answer:answerData
+			})
+			res.send(htmlStr)
+		})
+		
+	})
+})
 
 
+app.post('/photo',uploads.single('photo'),function(req,res){
+	res.status(200).json({code:3,msg:'上传成功'})
+})
+
+app.get('/clearCookie',function(req,res){
+	res.clearCookie('username')
+	res.status(200).json({code:3,msg:'退出成功'})
+})
 
 
 app.listen(2000,function(){

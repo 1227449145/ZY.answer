@@ -46,14 +46,14 @@
 
 		<!-- 注册表单 -->
 		<div class="container">
-			<form action="/user/register" method="post">
+			<form action="/register" method="post">
 				<!-- 昵称 -->
 				<div class="form-group">
-					<input type="text" class="form-control" name="petname" required pattern="^[a-zA-Z0-9\u4e00-\u9fa5]{2,16}$" placeholder="请填写昵称" />
+					<input type="text" class="form-control" name="username" required pattern="^[a-zA-Z0-9\u4e00-\u9fa5]{2,16}$" placeholder="请填写昵称" />
 				</div>
 				<!-- 密码 -->
 				<div class="form-group">
-					<input type="password" class="form-control" name="password" required pattern="^.{6,16}" placeholder="请填写密码" />
+					<input type="password" class="form-control" name="pwd" required pattern="^.{6,16}" placeholder="请填写密码" />
 				</div>
 				<!-- 确认密码 -->
 				<div class="form-group">
@@ -62,13 +62,13 @@
 				<!-- 性别 -->
 				<div class="checkbox">
 					<label for="male">
-						<input type="radio" name="isMale" value="true" id="male" checked />
+						<input type="radio" name="gender" value="true" id="male" checked />
 						先生
 					</label>
 				</div>
 				<div class="checkbox">
 					<label for="female">
-						<input type="radio" name="isMale" value="false" id="female" />
+						<input type="radio" name="gender" value="false" id="female" />
 						女士
 					</label>
 				</div>
@@ -98,7 +98,7 @@
 			})
 			// 首页
 			$('#home').click(function() {
-				location.href = 'index.html'
+				location.href = '/home';
 			})
 
 			// 提交表单
@@ -112,23 +112,19 @@
 				})
 
 				if(password[0] != password[1]) {
-					$('.modal-body').text('两次密码输入不一致，请重新输入')
-					$('#myModal').modal('show');
+					alert('两次密码输入不一致')
 					return;
 				}
 				// 用提交表单的元素值，编译成字符串
 				var data = $(this).serialize();
 				//	console.log(data)
-				$.post('/user/register', data, function(resData) {
+				$.post('/register', data, function(resData) {
 					// 提示用户的注册结果
-					$('.modal-body').text(resData.message);
-					// hide.bs.modal 模态消失后我们要做的操作
-					$('#myModal').modal('show').on('hide.bs.modal', function() {
-						if(resData.code == 3) {
+					alert(resData.msg)
+					if(resData.code == 3) {
 							// 跳转到登录页面
 							location.href = 'login.html';
-						}
-					});
+					}
 				});
 			})
 		</script>

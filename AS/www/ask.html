@@ -46,7 +46,7 @@
 
 		<!-- 提问表单 -->
 		<div class="container">
-			<form action="/question/ask" method="post">
+			<form action="/question" method="post">
 				<!-- 提问输入框 -->
 				<div class="form-group">
 					<textarea class="form-control" name="content" rows="10" cols="" placeholder="请详细描述您提问的内容"></textarea>
@@ -57,8 +57,13 @@
 		</div>
 		<script src="js/jquery.js"></script>
 		<script src="js/bootstrap.js"></script>
+		<script src="js/jquery.cookie.js"></script>
 		<!--<script src="scripts/ask.js"></script>-->
 		<script type="text/javascript">
+			
+			var username = $.cookie('username');
+console.log(username);
+			
 			// 返回上一页
 			$('#goBack').click(function() {
 				history.go(-1);
@@ -66,7 +71,7 @@
 
 			// 返回首页的方法
 			$('#home').click(function() {
-				location.href = 'index.html';
+				location.href = '/home';
 			});
 
 			// 提交问题的方法
@@ -75,13 +80,11 @@
 				event.preventDefault();
 				// 发送登录请求
 				var data = $(this).serialize();
-				$.post('/question/ask', data, function(resData) {
-					$('.modal-body').text(resData.message);
-					$('#myModal').modal('show').on('hide.bs.modal', function() {
-						if(resData.code == 3) {
-							location.href = 'index.html';
-						}
-					});
+				$.post('/question', data, function(resData) {
+					alert(resData.msg)
+					if(resData.code == 3) {
+							location.href = '/home';
+					}
 				});
 			});
 		</script>

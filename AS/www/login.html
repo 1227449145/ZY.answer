@@ -46,14 +46,14 @@
 
 		<!-- 登陆表单 -->
 		<div class="container">
-			<form action="/user/login" method="post">
+			<form action="/login" method="post">
 				<!-- 昵称 -->
 				<div class="form-group">
-					<input type="text" class="form-control" name="petname" required pattern="^[a-zA-Z0-9\u4e00-\u9fa5]{2,16}$" placeholder="请填写昵称" />
+					<input type="text" class="form-control" name="username" required pattern="^[a-zA-Z0-9\u4e00-\u9fa5]{2,16}$" placeholder="请填写昵称" />
 				</div>
 				<!-- 密码 -->
 				<div class="form-group">
-					<input type="password" class="form-control" name="password" required pattern="^.{6,16}" placeholder="请填写密码" />
+					<input type="password" class="form-control" name="pwd" required pattern="^.{6,16}" placeholder="请填写密码" />
 				</div>
 				<!-- 提交按钮 -->
 				<input type="submit" class="btn btn-success form-control" value="登陆" />
@@ -76,13 +76,12 @@
 				event.preventDefault();
 				// 发送登录请求
 				var data = $(this).serialize();
-				$.post('/user/login', data, function(resData) {
-					$('.modal-body').text(resData.message);
-					$('#myModal').modal('show').on('hide.bs.modal', function() {
-						if(resData.code == 3) {
-							location.href = 'index.html';
-						}
-					});
+				$.post('/login', data, function(resData) {
+					
+					alert(resData.msg)
+					if(resData.code == 3) {
+							location.href = '/home';
+					}
 				});
 			});
 		</script>

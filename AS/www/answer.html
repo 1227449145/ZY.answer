@@ -46,7 +46,7 @@
 
 		<!-- 回答表单 -->
 		<div class="container">
-			<form action="/question/ask" method="post">
+			<form action="/ask" method="post">
 				<!-- 回答输入框 -->
 				<div class="form-group">
 					<textarea class="form-control" name="content" rows="10" cols="" placeholder="请详细填写回答内容"></textarea>
@@ -67,7 +67,7 @@
 
 			// 返回首页的方法
 			$('#home').click(function() {
-				location.href = 'index.html';
+				location.href = '/home';
 			});
 
 			// 提交回答的方法
@@ -76,13 +76,11 @@
 				event.preventDefault();
 
 				var data = $(this).serialize();
-				$.post('/question/answer', data, function(resData) {
-					$('.modal-body').text(resData.message);
-					$('#myModal').modal('show').on('hide.bs.modal', function() {
-						if(resData.code == 3) {
-							location.href = 'index.html';
-						}
-					});
+				$.post('/answer', data, function(resData) {
+					alert(resData.msg)
+					if(resData.code == 3) {
+							location.href = '/home';
+					}
 				});
 			});
 		</script>
